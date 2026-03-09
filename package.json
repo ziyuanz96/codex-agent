@@ -1,0 +1,29 @@
+{
+  "name": "codex-agent",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist/index.js",
+    "openclaw.plugin.json"
+  ],
+  "openclaw": {
+    "extensions": [
+      "./dist/index.js"
+    ]
+  },
+  "scripts": {
+    "sync-version": "node --input-type=commonjs -e \"const p=require('./package.json'),o=require('./openclaw.plugin.json');o.version=p.version;require('fs').writeFileSync('./openclaw.plugin.json',JSON.stringify(o,null,2)+'\\n')\"",
+    "build": "npm run sync-version && esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:openclaw",
+    "dev": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:openclaw --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.2",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.18"
+  }
+}

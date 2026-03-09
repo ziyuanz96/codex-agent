@@ -1,0 +1,63 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Set version in package.json and openclaw.plugin.json
+        env:
+          TAG_VERSION: ${{ steps.version.outputs.VERSION }}
+        run: |
+          node -e "
+            const fs = require('fs');
+            const v = process.env.TAG_VERSION;
+            const pkg = JSON.parse(fs.readFileSync('./package.json', 'utf-8'));
+            pkg.version = v;
+            fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+            const ocl = JSON.parse(fs.readFileSync('./openclaw.plugin.json', 'utf-8'));
+            ocl.version = v;
+            fs.writeFileSync('./openclaw.plugin.json', JSON.stringify(ocl, null, 2) + '\n');
+            console.log('Version set to ' + v);
+          "
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Pack
+        run: npm pack
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: cursor-agent-${{ steps.version.outputs.VERSION }}.tgz
