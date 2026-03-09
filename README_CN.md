@@ -173,7 +173,11 @@ openclaw gateway restart
 ## 致谢
 
 本项目的插件结构与思路参考了：
-- `toheart/cursor-agent`
+- [toheart/cursor-agent](https://github.com/toheart/cursor-agent)
+
+相关生态项目：
+- [OpenClaw](https://github.com/openclaw/openclaw)
+- [GitHub CLI](https://github.com/cli/cli)
 
 感谢原项目提供了非常实用的 OpenClaw 插件实践范式。
 
@@ -181,4 +185,4 @@ openclaw gateway restart
 
 ## License
 
-Apache-2.0
+[Apache-2.0](./LICENSE)

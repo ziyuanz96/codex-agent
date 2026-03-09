@@ -169,7 +169,11 @@ Each line is JSON for events like `run`, `reject`, `rm_blocked_needs_confirm`, e
 ## Acknowledgements
 
 This project was initially inspired by the idea and structure of:
-- `toheart/cursor-agent`
+- [toheart/cursor-agent](https://github.com/toheart/cursor-agent)
+
+Related ecosystem projects:
+- [OpenClaw](https://github.com/openclaw/openclaw)
+- [GitHub CLI](https://github.com/cli/cli)
 
 Thanks to the original open-source work for the practical OpenClaw plugin pattern.
 
@@ -177,4 +181,4 @@ Thanks to the original open-source work for the practical OpenClaw plugin patter
 
 ## License
 
-Apache-2.0
+[Apache-2.0](./LICENSE)
