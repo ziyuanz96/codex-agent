@@ -1,5 +1,12 @@
 # codex-agent（OpenClaw 插件）
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![OpenClaw](https://img.shields.io/badge/OpenClaw-Plugin-6f42c1)](https://github.com/openclaw/openclaw)
+
+- 项目仓库：https://github.com/ziyuanz96/codex-agent
+- 参考项目：https://github.com/toheart/cursor-agent
+- OpenClaw：https://github.com/openclaw/openclaw
+
 一个面向 OpenClaw 的远程执行网关插件：把 `/codex` 指令通过 SSH 转发到**远程 Codex CLI**，并基于白名单目录做边界控制。
 
 > 设计目标：OpenClaw 负责 IM 消息路由，Codex 负责代码执行。
