@@ -37,6 +37,9 @@
 /codex <project-key> <prompt>
 ```
 
+`<project-key>` 就是项目代号（例如 `sa`、`sb`、`sc`）。
+这些代号定义在 `plugins.entries.codex-agent.config.projects`。
+
 示例：
 
 ```bash

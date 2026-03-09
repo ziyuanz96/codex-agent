@@ -30,6 +30,9 @@ A secure-ish gateway plugin for OpenClaw that forwards `/codex` commands to **re
 /codex <project-key> <prompt>
 ```
 
+`<project-key>` is your project alias (for example `sa`, `sb`, `sc`).
+Aliases are defined in `plugins.entries.codex-agent.config.projects`.
+
 Example:
 
 ```bash
