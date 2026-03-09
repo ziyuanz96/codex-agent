@@ -1,5 +1,7 @@
 # codex-agent（OpenClaw 插件）
 
+[English](./README.md) | [中文](./README_CN.md)
+
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
 [![OpenClaw](https://img.shields.io/badge/OpenClaw-Plugin-6f42c1)](https://github.com/openclaw/openclaw)
 

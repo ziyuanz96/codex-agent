@@ -1,5 +1,7 @@
 # codex-agent (OpenClaw Plugin)
 
+[English](./README.md) | [中文](./README_CN.md)
+
 A secure-ish gateway plugin for OpenClaw that forwards `/codex` commands to **remote Codex CLI over SSH**, with project allowlist controls.
 
 > Design goal: OpenClaw handles IM routing; Codex handles execution.
