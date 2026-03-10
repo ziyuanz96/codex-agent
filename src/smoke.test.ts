@@ -13,6 +13,13 @@ describe("codex-agent smoke", () => {
     expect(p.confirmRm).toBe(true);
   });
 
+  it("parses confirm write/risk", () => {
+    const p = parseCommandArgs("sa --confirm-write --confirm-risk 覆盖 config 文件");
+    if ("error" in p) throw new Error(p.error);
+    expect(p.confirmWrite).toBe(true);
+    expect(p.confirmRisk).toBe(true);
+  });
+
   it("resolves allowlist only", () => {
     expect(resolveProjectPath("sa", { sa: "/x/a" })).toBe("/x/a");
     expect(resolveProjectPath("/tmp", { sa: "/x/a" })).toBeNull();

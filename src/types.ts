@@ -52,10 +52,39 @@ export interface ResultUsage {
   cachedInputTokens?: number;
 }
 
-export interface CollectedEvent {
-  type: "assistant" | "reasoning" | "result";
-  text?: string;
+interface BaseCollectedEvent {
   timestamp?: number;
+}
+
+export interface AssistantCollectedEvent extends BaseCollectedEvent {
+  type: "assistant";
+  text?: string;
+}
+
+export interface ReasoningCollectedEvent extends BaseCollectedEvent {
+  type: "reasoning";
+  text?: string;
+}
+
+export interface ResultCollectedEvent extends BaseCollectedEvent {
+  type: "result";
+}
+
+export interface ToolStartCollectedEvent extends BaseCollectedEvent {
+  type: "tool_start";
+  toolName?: string;
+  toolArgs?: string;
+}
+
+export type CollectedEvent =
+  | AssistantCollectedEvent
+  | ReasoningCollectedEvent
+  | ResultCollectedEvent
+  | ToolStartCollectedEvent;
+
+export interface ResolvedBinary {
+  nodeBin: string;
+  entryScript: string;
 }
 
 export interface RunResult {
@@ -78,4 +107,6 @@ export interface ParsedCommand {
   resumeSessionId?: string;
   reload?: boolean;
   confirmRm?: boolean;
+  confirmWrite?: boolean;
+  confirmRisk?: boolean;
 }
