@@ -2,7 +2,7 @@
   "id": "codex-agent",
   "name": "Codex Agent",
   "description": "Invoke local Codex CLI from /codex command with project allowlist and verbatim output.",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
