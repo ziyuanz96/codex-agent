@@ -444,9 +444,9 @@ export default {
     const timestamp = now.toTimeString().split(' ')[0];
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
     console.log(`${timestamp} [plugins] ${PLUGIN_ID}: Registered /codex command`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   mode:    ${mode}`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   codex:   ${codexPath}`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   projects: ${projectList()}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: mode: ${mode}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: codex: ${codexPath}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: projects: ${projectList()}`);
   },
 };
 
