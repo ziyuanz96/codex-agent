@@ -446,10 +446,10 @@ export default {
     const cyan = '\x1b[36m';
     const reset = '\x1b[0m';
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: Registered /codex command`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: mode: ${mode}`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: codex: ${codexPath}`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: projects: ${projectList()}`);
+    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}Registered /codex command${reset}`);
+    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}mode: ${mode}${reset}`);
+    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}codex: ${codexPath}${reset}`);
+    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}projects: ${projectList()}${reset}`);
   },
 };
 
