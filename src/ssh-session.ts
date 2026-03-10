@@ -17,6 +17,7 @@ interface SshSession {
   createdAt: number;
   lastActiveAt: number;
   cwd: string;
+  rootPath: string;
 }
 
 interface CommandWaiter {
@@ -144,11 +145,14 @@ function enqueueCommand(s: SshSession, rawCommand: string, timeoutMs: number): P
 
     s.queue.push(waiter);
 
+    const root = q(s.rootPath);
     const script = [
       `printf '__OC_BEGIN_${markerId}__\\n'`,
       rawCommand,
       "__oc_ec=$?",
-      "printf '\\n__OC_PWD__%s' \"$PWD\"",
+      "__oc_pwd=$(pwd -P 2>/dev/null || pwd)",
+      `case "$__oc_pwd" in ${root}|${root}/*) ;; *) echo '\n__OC_SANDBOX_BLOCK__path escaped allowlist root; forcing cwd reset'; cd ${root}; __oc_ec=126; __oc_pwd=$(pwd -P 2>/dev/null || pwd);; esac`,
+      "printf '\\n__OC_PWD__%s' \"$__oc_pwd\"",
       `printf '\\n__OC_END_${markerId}__:%s\\n' \"$__oc_ec\"`,
     ].join("\n");
 
@@ -193,6 +197,7 @@ export function startSshSession(params: {
     createdAt: now(),
     lastActiveAt: now(),
     cwd: params.projectPath,
+    rootPath: params.projectPath,
   };
 
   attachParser(session);
