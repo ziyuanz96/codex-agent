@@ -6,6 +6,7 @@ import { runCodexAgent } from "./runner.js";
 import { formatRunResult } from "./formatter.js";
 import { ensureShutdownHook, setMaxConcurrent } from "./process-registry.js";
 import { createCodexAgentTool } from "./tool.js";
+import { getSshSessionStatus, runSshCommand, startSshSession, stopSshSession } from "./ssh-session.js";
 import type { CodexAgentConfig, ParsedCommand } from "./types.js";
 
 const PLUGIN_ID = "codex-agent";
@@ -225,6 +226,46 @@ export function tokenize(input: string): string[] {
   return tokens;
 }
 
+type ParsedSshCommand =
+  | { action: "start"; project: string }
+  | { action: "cmd"; project: string; command: string }
+  | { action: "stop"; project: string }
+  | { action: "status"; project?: string }
+  | { action: "reset"; project: string };
+
+function parseSshArgs(args: string): ParsedSshCommand | { error: string } {
+  const raw = (args ?? "").trim();
+  if (!raw) {
+    return {
+      error:
+        "Usage: /ssh <action> [project] [command]\n\nActions:\n  start <project>           Start/reuse persistent SSH session\n  cmd <project> <command>   Run command inside session\n  status [project]          Show session status\n  stop <project>            Stop session\n  reset <project>           Reset session (stop + start)",
+    };
+  }
+
+  const tokens = tokenize(raw);
+  const action = (tokens[0] ?? "").toLowerCase();
+
+  if (action === "status") {
+    return { action: "status", project: tokens[1] };
+  }
+
+  if (action === "start" || action === "stop" || action === "reset") {
+    const project = tokens[1];
+    if (!project) return { error: `${action} requires <project>` };
+    return { action: action as "start" | "stop" | "reset", project };
+  }
+
+  if (action === "cmd") {
+    const project = tokens[1];
+    if (!project) return { error: "cmd requires <project> <command>" };
+    const command = raw.split(/\s+/).slice(2).join(" ").trim();
+    if (!command) return { error: "cmd requires a command body" };
+    return { action: "cmd", project, command };
+  }
+
+  return { error: `Unknown action: ${action}` };
+}
+
 export default {
   id: PLUGIN_ID,
   configSchema: { type: "object" as const },
@@ -435,6 +476,87 @@ export default {
       },
     });
 
+    api.registerCommand({
+      name: "ssh",
+      description: `Persistent SSH relay on allowed projects. Available: ${projectList()}`,
+      acceptsArgs: true,
+      requireAuth: false,
+      async handler(ctx: any) {
+        const parsed = parseSshArgs(ctx.args ?? "");
+        if ("error" in parsed) return { text: parsed.error };
+
+        if (!cfg.remote?.enabled) {
+          return { text: "❌ ssh relay requires remote mode to be enabled in plugin config." };
+        }
+
+        const userId = String(ctx?.senderId ?? ctx?.userId ?? "unknown");
+
+        if (parsed.action === "status") {
+          const rows = getSshSessionStatus({ userId, project: parsed.project });
+          if (rows.length === 0) {
+            return { text: parsed.project ? `No active SSH session for '${parsed.project}'.` : "No active SSH sessions." };
+          }
+          const lines = rows.map((r) => {
+            const idleSec = Math.max(0, Math.round((Date.now() - r.lastActiveAt) / 1000));
+            return `- ${r.project} | cwd=${r.cwd} | idle=${idleSec}s`;
+          });
+          return { text: `SSH sessions:\n${lines.join("\n")}` };
+        }
+
+        const projectPath = resolveProjectPath(parsed.project, projects);
+        if (!projectPath) {
+          return { text: `Project not found or not allowed: ${parsed.project}\nAvailable: ${projectList()}` };
+        }
+
+        if (parsed.action === "start") {
+          const started = startSshSession({
+            userId,
+            project: parsed.project,
+            projectPath,
+            remote: cfg.remote,
+          });
+          if (!started.ok) return { text: `❌ ${started.error}` };
+          return { text: `✅ SSH session ${started.reused ? "reused" : "started"} for '${parsed.project}'\nCWD: ${started.cwd}` };
+        }
+
+        if (parsed.action === "stop") {
+          const stopped = stopSshSession({ userId, project: parsed.project });
+          return { text: stopped.ok ? `✅ ${stopped.message}` : `ℹ️ ${stopped.message}` };
+        }
+
+        if (parsed.action === "reset") {
+          stopSshSession({ userId, project: parsed.project });
+          const started = startSshSession({
+            userId,
+            project: parsed.project,
+            projectPath,
+            remote: cfg.remote,
+          });
+          if (!started.ok) return { text: `❌ ${started.error}` };
+          return { text: `✅ SSH session reset for '${parsed.project}'\nCWD: ${started.cwd}` };
+        }
+
+        const result = await runSshCommand({
+          userId,
+          project: parsed.project,
+          command: parsed.command,
+          timeoutSec: cfg.defaultTimeoutSec ?? DEFAULT_TIMEOUT_SEC,
+        });
+
+        if (!result.ok) return { text: `❌ ${result.error}` };
+
+        const out = result.result.output.trim();
+        return {
+          text: [
+            `project: ${parsed.project}`,
+            `cwd: ${result.result.cwd}`,
+            `exit: ${result.result.exitCode}`,
+            out ? `output:\n${out}` : "output: (empty)",
+          ].join("\n"),
+        };
+      },
+    });
+
     if (cfg.enableAgentTool === true && Object.keys(projects).length > 0) {
       api.registerTool(createCodexAgentTool({ codexPath, projects, cfg }), { name: "codex_agent", optional: true });
     }
@@ -447,7 +569,7 @@ export default {
     const cyan = '\x1b[36m';
     const reset = '\x1b[0m';
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
-    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}:${reset} ${cyan}Registered /codex command${reset}`);
+    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}:${reset} ${cyan}Registered /codex and /ssh commands${reset}`);
     console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}:${reset} ${cyan}mode: ${mode}${reset}`);
     console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}:${reset} ${cyan}codex: ${codexPath}${reset}`);
     console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}:${reset} ${cyan}projects: ${projectList()}${reset}`);
