@@ -439,14 +439,16 @@ export default {
       api.registerTool(createCodexAgentTool({ codexPath, projects, cfg }), { name: "codex_agent", optional: true });
     }
 
-    // 美观的注册日志（带时间戳，与其他插件对齐）
+    // 美观的注册日志（带时间戳和颜色，与其他插件对齐）
     const now = new Date();
     const timestamp = now.toTimeString().split(' ')[0];
+    const cyan = '\x1b[36m';
+    const reset = '\x1b[0m';
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: Registered /codex command`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: mode: ${mode}`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: codex: ${codexPath}`);
-    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: projects: ${projectList()}`);
+    console.log(`${timestamp} [plugins] ${cyan}${PLUGIN_ID}${reset}: Registered /codex command`);
+    console.log(`${timestamp} [plugins] ${cyan}${PLUGIN_ID}${reset}: mode: ${mode}`);
+    console.log(`${timestamp} [plugins] ${cyan}${PLUGIN_ID}${reset}: codex: ${codexPath}`);
+    console.log(`${timestamp} [plugins] ${cyan}${PLUGIN_ID}${reset}: projects: ${projectList()}`);
   },
 };
 
