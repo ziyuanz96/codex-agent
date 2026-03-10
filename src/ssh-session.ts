@@ -87,6 +87,48 @@ function attachParser(s: SshSession): void {
   s.proc.on("exit", onExit);
 }
 
+function cleanCommandOutput(raw: string): string {
+  // strip ANSI/control sequences while keeping newlines/tabs
+  let text = raw
+    .replace(/\u001b\[[0-9;?]*[ -/]*[@-~]/g, "")
+    .replace(/\u001b\][^\u0007]*(\u0007|\u001b\\)/g, "")
+    .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, "");
+
+  const lines = text.split("\n");
+  const cleaned: string[] = [];
+
+  for (const line of lines) {
+    const l = line.replace(/\r/g, "").trimEnd();
+    if (!l) {
+      cleaned.push("");
+      continue;
+    }
+
+    // drop plugin protocol / internal shell helper lines
+    if (
+      l.includes("__OC_BEGIN_") ||
+      l.includes("__OC_END_") ||
+      l.includes("__OC_PWD__") ||
+      l.startsWith("__oc_") ||
+      l.startsWith("printf '__OC_BEGIN_") ||
+      l.startsWith("printf '\\n__OC_END_") ||
+      l.startsWith("__oc_ec=") ||
+      l.startsWith("__oc_pwd=")
+    ) {
+      continue;
+    }
+
+    // drop likely interactive prompt echoes such as "(base) user@host:~/x$ ..."
+    if (/^(\([^)]*\)\s*)?[\w.-]+@[\w.-]+:.*[#$]\s*/.test(l)) {
+      continue;
+    }
+
+    cleaned.push(l);
+  }
+
+  return cleaned.join("\n").replace(/\n{3,}/g, "\n\n").trimEnd();
+}
+
 function consumeQueue(s: SshSession): void {
   if (s.queue.length === 0) return;
   const head = s.queue[0]!;
@@ -121,7 +163,7 @@ function consumeQueue(s: SshSession): void {
   s.queue.shift();
   clearTimeout(head.timeout);
   head.resolve({
-    output: output.trimEnd(),
+    output: cleanCommandOutput(output),
     exitCode: Number.isNaN(exitCode) ? 1 : exitCode,
     cwd,
   });
