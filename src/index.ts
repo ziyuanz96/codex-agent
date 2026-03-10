@@ -231,7 +231,12 @@ export default {
 
   register(api: any) {
     const cfg: CodexAgentConfig & { auditLogPath?: string } = api.pluginConfig ?? {};
-    const codexPath = cfg.codexPath || detectCodexPath() || "codex";
+    
+    // 远程模式下跳过本地 codex 检测
+    const codexPath = cfg.remote?.enabled 
+      ? (cfg.remote.codexPath || "codex")
+      : (cfg.codexPath || detectCodexPath() || "codex");
+    
     if (!cfg.remote?.enabled && !detectCodexPath() && !cfg.codexPath) {
       console.warn(`[${PLUGIN_ID}] codex CLI not found locally (set codexPath or enable remote mode), plugin disabled`);
       return;
@@ -434,7 +439,12 @@ export default {
       api.registerTool(createCodexAgentTool({ codexPath, projects, cfg }), { name: "codex_agent", optional: true });
     }
 
-    console.log(`[${PLUGIN_ID}] registered /codex (codex: ${codexPath}, projects: ${projectList()})`);
+    // 美观的注册日志
+    const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
+    console.log(`[plugins] ${PLUGIN_ID}: Registered /codex command`);
+    console.log(`[plugins] ${PLUGIN_ID}:   mode: ${mode}`);
+    console.log(`[plugins] ${PLUGIN_ID}:   codex: ${codexPath}`);
+    console.log(`[plugins] ${PLUGIN_ID}:   projects: ${projectList()}`);
   },
 };
 
