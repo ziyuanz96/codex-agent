@@ -26,6 +26,8 @@
 - 删除确认 TTL（短时有效）
 - 基础审计日志
 - 失败重试上限（最多自动重试 1 次）
+- **可选的持久 SSH 中继**（`/ssh`）用于连续多步远程操作
+- `/ssh` 会按“用户+项目”维持会话，并限制在项目根目录内
 
 ---
 
@@ -71,6 +73,35 @@
 # 在确认时效内再次提交才会执行
 ```
 
+### 5）持久 SSH 中继（`/ssh`）
+
+当你需要“连续 shell 操作”而不是单次 `/codex` 时使用。
+
+```bash
+/ssh start <project>
+/ssh cmd <project> <command>
+/ssh status [project]
+/ssh stop <project>
+/ssh reset <project>
+```
+
+示例：
+
+```bash
+/ssh start sa
+/ssh cmd sa pwd
+/ssh cmd sa conda activate timeserieslibrary
+/ssh cmd sa python train.py
+/ssh status sa
+/ssh stop sa
+```
+
+说明：
+
+- `/ssh` 是**非 TTY 的命令中继**，不是完整终端 UI。
+- `nvtop` 这类 TUI 程序在该模式下失败是预期行为。
+- 长任务建议后台启动（`nohup ... &`）并配合日志查看。
+
 ---
 
 ## 当前安全模型
@@ -81,6 +112,7 @@
 - 拦截明显高风险路径模式（如 `/etc`、`/root`、`~/.ssh`、路径穿越等）
 - 删除意图必须显式确认
 - 执行/拦截行为写审计日志
+- `/ssh` 会话强制限制在项目根目录内，越界会被阻断并拉回
 
 ### 重要说明
 

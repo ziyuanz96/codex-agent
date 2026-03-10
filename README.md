@@ -19,6 +19,8 @@ A secure-ish gateway plugin for OpenClaw that forwards `/codex` commands to **re
 - Confirmation TTL for dangerous delete actions
 - Basic audit logging
 - Failure retry cap (max 1 auto-retry)
+- **Optional persistent SSH relay** (`/ssh`) for multi-step remote shell workflows
+- `/ssh` keeps per-user per-project sessions and enforces project root cwd sandbox
 
 ---
 
@@ -64,6 +66,35 @@ If delete intent is detected, command is blocked first.
 # allowed (must be within confirmation TTL)
 ```
 
+### 5) Persistent SSH relay (`/ssh`)
+
+Use this when you need a continuous remote shell session instead of one-shot `/codex`.
+
+```bash
+/ssh start <project>
+/ssh cmd <project> <command>
+/ssh status [project]
+/ssh stop <project>
+/ssh reset <project>
+```
+
+Examples:
+
+```bash
+/ssh start sa
+/ssh cmd sa pwd
+/ssh cmd sa conda activate timeserieslibrary
+/ssh cmd sa python train.py
+/ssh status sa
+/ssh stop sa
+```
+
+Notes:
+
+- `/ssh` is **non-TTY command relay**, not full terminal UI.
+- TUI programs like `nvtop` are expected to fail in this mode.
+- Long-running jobs should be started in background (`nohup ... &`) and checked by logs.
+
 ---
 
 ## Security Model (Current)
@@ -74,6 +105,7 @@ If delete intent is detected, command is blocked first.
 - Prompt blocks obvious risky path patterns (`/etc`, `/root`, `~/.ssh`, traversal patterns, etc.)
 - Delete intent requires explicit confirmation flag
 - Audit records written to local log file
+- `/ssh` sessions are bound to project root and auto-block cwd escaping out of allowlist root
 
 ### Important note
 
