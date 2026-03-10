@@ -439,12 +439,14 @@ export default {
       api.registerTool(createCodexAgentTool({ codexPath, projects, cfg }), { name: "codex_agent", optional: true });
     }
 
-    // 美观的注册日志
+    // 美观的注册日志（带时间戳，与其他插件对齐）
+    const now = new Date();
+    const timestamp = now.toTimeString().split(' ')[0];
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
-    console.log(`[plugins] ${PLUGIN_ID}: Registered /codex command`);
-    console.log(`[plugins] ${PLUGIN_ID}:   mode: ${mode}`);
-    console.log(`[plugins] ${PLUGIN_ID}:   codex: ${codexPath}`);
-    console.log(`[plugins] ${PLUGIN_ID}:   projects: ${projectList()}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}: Registered /codex command`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   mode:    ${mode}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   codex:   ${codexPath}`);
+    console.log(`${timestamp} [plugins] ${PLUGIN_ID}:   projects: ${projectList()}`);
   },
 };
 
