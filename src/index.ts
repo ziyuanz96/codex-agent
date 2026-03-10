@@ -442,14 +442,15 @@ export default {
     // 美观的注册日志（带时间戳和颜色，与其他插件对齐）
     const now = new Date();
     const timestamp = now.toTimeString().split(' ')[0];
+    const gray = '\x1b[90m';
     const purple = '\x1b[35m';
     const cyan = '\x1b[36m';
     const reset = '\x1b[0m';
     const mode = cfg.remote?.enabled ? `remote (${cfg.remote.host})` : "local";
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}Registered /codex command${reset}`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}mode: ${mode}${reset}`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}codex: ${codexPath}${reset}`);
-    console.log(`${timestamp} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}projects: ${projectList()}${reset}`);
+    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}Registered /codex command${reset}`);
+    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}mode: ${mode}${reset}`);
+    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}codex: ${codexPath}${reset}`);
+    console.log(`${gray}${timestamp}${reset} ${purple}[plugins]${reset} ${cyan}${PLUGIN_ID}${reset}: ${cyan}projects: ${projectList()}${reset}`);
   },
 };
 
