@@ -83,7 +83,7 @@ Examples:
 ```bash
 /ssh start sa
 /ssh cmd sa pwd
-/ssh cmd sa conda activate timeserieslibrary
+/ssh cmd sa conda activate <your-env>
 /ssh cmd sa python train.py
 /ssh status sa
 /ssh stop sa
